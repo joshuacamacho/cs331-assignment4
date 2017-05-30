@@ -24,20 +24,26 @@ public class Cs331Assignment4 {
     }
 
     
+
+    
+
+    
+
+    
     //Node for storing test
     public static class Node{
         String name;
         int cost;
         float prob;
         int totalcost;
-        int totalprob;
+        float totalprob;
         float ratio;
         Node(){
             name = "";
             cost = 0;
             prob = 0;
             totalcost=0;
-            totalprob=0;
+            totalprob=0.0f;
             ratio=0.0f;
         }
         
@@ -46,7 +52,7 @@ public class Cs331Assignment4 {
             cost = c;
             prob = p;
             totalcost=0;
-            totalprob=0;
+            totalprob=0.0f;
             ratio=0.0f;
         }
     }
@@ -74,8 +80,11 @@ public class Cs331Assignment4 {
             CONTINUE = exitOrNot();
             
         }
-        
-        
+       computeRatios(a); 
+       LinkedList optimal = getOptimal(a);
+       System.out.println("-----------Optimal Sequence-------\n");
+       display(optimal);
+               
     }
     
     public static void display(ArrayList a){
@@ -126,5 +135,71 @@ public class Cs331Assignment4 {
         n.prob = scan.nextFloat();
         
         return true;
+    }
+    
+    private static void computeRatios(ArrayList<LinkedList> a) {
+        for(int i=0 ; i<a.size(); i++){
+            LinkedList l = (LinkedList)a.get(i);
+            for(int j=0; j<l.size(); j++){
+                Node n = (Node)l.get(j);
+                if(j==0){
+                    n.totalcost=n.cost;
+                    n.totalprob=n.prob;
+                    
+                }else{
+                    Node before = (Node)l.get(j-1);
+                    n.totalcost= n.cost + before.totalcost;
+                    n.totalprob = n.prob + before.totalprob;
+               
+                }
+                n.ratio=n.totalcost/n.totalprob;
+            }
+        }
+    }
+    
+    private static LinkedList getOptimal(ArrayList<LinkedList> a) {
+        int maxLength = getMaxLength(a);
+        LinkedList op = new LinkedList<Node>();
+        float lowestRatio=9999999.0f; 
+        int lowesti=0;
+        int lowestj=0;
+        LinkedList l;
+        while(maxLength>0){
+            lowestRatio=9999999.0f;
+            for(int i=0; i<a.size();i++){
+                l = (LinkedList)a.get(i);
+                for(int j=0; j<l.size();j++){
+                    Node n = (Node)l.get(j);
+                    if(lowestRatio>n.ratio){
+                        lowestRatio=n.ratio;
+                        lowesti=i;
+                        lowestj=j;
+                    }
+                }
+            }
+           l = (LinkedList)a.get(lowesti);
+           LinkedList temp = new LinkedList<Node>();
+           for(int i=0; i<=lowestj; i++){
+               temp.add(l.get(i));
+           }
+           
+           op.addAll(temp);
+           temp.clear();
+           for(int i=lowestj+1; i<l.size();i++){
+               temp.add(l.get(i));
+           }
+           a.set(lowesti, temp);
+           maxLength = getMaxLength(a);
+        }
+        return op;
+    }
+    
+    private static int getMaxLength(ArrayList<LinkedList> a) {
+       int length =0;
+        for(int i=0; i<a.size(); i++){
+           LinkedList l = (LinkedList)a.get(i);
+           if(length<l.size()) length=l.size();
+       }
+       return length;
     }
 }
